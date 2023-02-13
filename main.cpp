@@ -69,9 +69,6 @@ uint16_t mem_read(uint16_t address) {
     return 0;
 }
 
-void mem_write(uint16_t address, uint16_t val) {
-}
-
 int main(int argc, const char *argv[]) {
     if (argc < 2) {
         /* show usage string */
@@ -154,18 +151,23 @@ int main(int argc, const char *argv[]) {
         case OP_LD: {
             uint16_t dr = instr >> 9 & 0x7;
             uint16_t pc_offset_9 = instr & 0x1FF;
-            mem_write(reg[R_PC] + sign_extend(pc_offset_9, 9), reg[dr]);
+            reg[dr] = mem_read(reg[R_PC] + sign_extend(pc_offset_9, 9));
             update_flags(dr);
             break;
         }
         case OP_LDI: {
             uint16_t dr = instr >> 9 & 0x7;
             uint16_t pc_offset_9 = instr & 0x1FF;
-            mem_write(mem_read(reg[R_PC] + sign_extend(pc_offset_9, 9)), reg[dr]);
+            reg[dr] = mem_read(mem_read(reg[R_PC] + sign_extend(pc_offset_9, 9)));
             update_flags(dr);
             break;
         }
         case OP_LDR: {
+            uint16_t dr = instr >> 9 & 0x7;
+            uint16_t base_r = instr >> 6 & 0x7;
+            uint16_t offset_6 = instr & 0x3F;
+            reg[dr] = mem_read(reg[base_r] + sign_extend(offset_6, 6));
+            update_flags(dr);
             break;
         }
         case OP_LEA: {
